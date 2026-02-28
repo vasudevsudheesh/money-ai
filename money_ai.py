@@ -1,20 +1,25 @@
-import os
 import telebot
+import os
+from flask import Flask
+import threading
 
-TOKEN = os.environ.get("BOT_TOKEN")
+TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Bot is running!"
+
+def run_bot():
+    bot.infinity_polling()
+
 @bot.message_handler(commands=['start'])
-def start(message):
-    bot.reply_to(message, "Money AI is live.")
-
-@bot.message_handler(commands=['recover'])
-def recover(message):
-    bot.reply_to(message, "Send debtor objection after /recover")
-
-@bot.message_handler(commands=['sales'])
-def sales(message):
-    bot.reply_to(message, "Send customer objection after /sales")
+def send_welcome(message):
+    bot.reply_to(message, "Hello! Money AI Bot is running!")
 
 if __name__ == "__main__":
-    bot.infinity_polling()
+    t = threading.Thread(target=run_bot)
+    t.start()
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
